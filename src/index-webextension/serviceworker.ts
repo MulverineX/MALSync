@@ -1,3 +1,8 @@
+declare const self: {
+  addEventListener(type: 'notificationclick', listener: (event: any) => void): void;
+  clients: { openWindow(url: string): Promise<any> };
+};
+
 import { initDatabase } from '../background/database';
 import { listSyncInit } from '../background/listSync';
 import { initProgressScheduler } from '../background/releaseProgress';
@@ -49,8 +54,12 @@ try {
 }
 
 // Notification actions
-chrome.notifications.onClicked.addListener(function (notificationId) {
-  chrome.tabs.create({ url: notificationId });
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const url = event.notification.data?.url;
+  if (url) {
+    event.waitUntil(self.clients.openWindow(url));
+  }
 });
 
 // Discord Rich Presence

@@ -50,3 +50,7 @@ src/chibiScript/ChibiGeneratorTypes.ts
 
 # IDE
 .idea
+
+# Node version managers
+.node-version
+.nvmrc

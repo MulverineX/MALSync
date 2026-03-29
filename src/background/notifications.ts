@@ -1,7 +1,13 @@
+declare const self: {
+  registration: {
+    showNotification(title: string, options?: NotificationOptions): Promise<void>;
+  };
+};
+
 export const defaultImg =
   'https://raw.githubusercontent.com/MALSync/MALSync/master/assets/icons/icon128.png';
 
-// Only works on the background Page
+// Only works on the background Page (service worker)
 export async function sendNotification(options: {
   url: string;
   title: string;
@@ -14,22 +20,26 @@ export async function sendNotification(options: {
   con.m('Notification').log(options);
 
   const imgBlob = await getImageBlob(options.image);
-  const messageArray = {
-    type: 'basic' as const,
-    title: options.title,
-    message: options.text,
-    iconUrl: imgBlob,
-    contextMessage: 'MAL-Sync',
+
+  const notificationOptions: NotificationOptions = {
+    body: options.text,
+    icon: imgBlob,
+    tag: options.url,
+    data: { url: options.url },
     requireInteraction: options.sticky ?? false,
-    eventTime: Date.now(),
   };
+
   try {
-    chrome.notifications.create(options.url, messageArray);
+    await self.registration.showNotification(options.title, notificationOptions);
   } catch (e) {
     con.error(e);
-    // @ts-ignore
-    delete messageArray.requireInteraction;
-    chrome.notifications.create(options.url, messageArray);
+    // Fallback without requireInteraction
+    delete notificationOptions.requireInteraction;
+    try {
+      await self.registration.showNotification(options.title, notificationOptions);
+    } catch (e2) {
+      con.error(e2);
+    }
   }
 }
 

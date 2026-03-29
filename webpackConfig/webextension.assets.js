@@ -132,14 +132,12 @@ const generateManifest = () => {
     browser_specific_settings: {
       gecko: {
         id: '{ceb9801e-aa0c-4bc6-a6b0-9494f3164cc7}',
+        strict_min_version: '121.0',
       },
     },
-    background: appTarget === 'firefox' ?
-      {
-        scripts: ['background.js'],
-      } : {
-        service_worker: 'background.js',
-      },
+    background: {
+      service_worker: 'background.js',
+    },
     content_security_policy: {
       extension_pages: "script-src 'self'; object-src 'self';",
     },
